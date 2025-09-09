@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
 
       try {
         final response = await http.get(
-          Uri.parse("http://10.13.13.84:5000/data/$barcode"),
+          Uri.parse("http://10.255.85.198:5000/data/$barcode"),
         );
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);

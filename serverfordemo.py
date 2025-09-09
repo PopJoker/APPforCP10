@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import random
+import datetime
 
 app = Flask(__name__)
 
@@ -9,6 +10,31 @@ barcodes = ["MD0625000003", "MD0625000004", "MD0625000005"]
 # 控制每個 barcode 是否上傳
 barcode_status = {code: True for code in barcodes}
 
+# 每個 barcode 的歷史資料 (只建立一次)
+history_data = {}
+
+def generate_history():
+    """產生前七天的電價差額假資料"""
+    today = datetime.date.today()
+    history = []
+    for i in range(7):
+        day = today - datetime.timedelta(days=i)
+        history.append({
+            "date": day.isoformat(),
+            "price_diff": round(random.uniform(0, 10), 2)  # 假設差額範圍 -10 ~ +10
+        })
+    return list(reversed(history))  # 讓時間由舊到新排序
+
+
+@app.before_request
+def ensure_history():
+    """確保每次第一次連線時建立歷史資料"""
+    global history_data
+    for code in barcodes:
+        if code not in history_data:
+            history_data[code] = generate_history()
+
+
 @app.route("/data/<barcode>")
 def get_data_barcode(barcode):
     if barcode not in barcodes:
@@ -17,7 +43,7 @@ def get_data_barcode(barcode):
         return jsonify({"error": "Barcode offline"}), 403
 
     chg_status = random.choice(["CHG", "DISCHG"])
-    
+
     data = {
         "voltage": round(random.uniform(50, 60), 2),
         "current": round(random.uniform(0, 10), 2),
@@ -30,6 +56,7 @@ def get_data_barcode(barcode):
     }
     return jsonify({barcode: data})
 
+
 # 控制單個 barcode 上傳狀態
 @app.route("/control_barcode", methods=["POST"])
 def control_barcode():
@@ -41,12 +68,14 @@ def control_barcode():
         return jsonify({"message": f"Barcode {code} online set to {status}"})
     return jsonify({"error": "Invalid payload or barcode"}), 400
 
+
 @app.route("/check/<barcode>")
 def check_barcode(barcode):
     if barcode in barcodes:
         return jsonify({"exists": True})
     else:
         return jsonify({"exists": False})
+
 
 @app.route("/status/<barcode>")
 def get_status(barcode):
@@ -56,6 +85,17 @@ def get_status(barcode):
     else:
         # barcode 不存在
         return jsonify({"error": "Barcode not found"}), 404
+
+
+@app.route("/history/<barcode>")
+def get_history(barcode):
+    if barcode not in barcodes:
+        return jsonify({"error": "Barcode not found"}), 404
+    return jsonify({
+        "barcode": barcode,
+        "history": history_data.get(barcode, [])
+    })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

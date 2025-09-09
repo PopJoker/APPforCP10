@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
     for (var site in widget.addedSites) {
       final barcode = site['barcode'];
       try {
-        final resp = await http.get(Uri.parse("http://10.13.13.84:5000/status/$barcode"));
+        final resp = await http.get(Uri.parse("http://10.255.85.198:5000/status/$barcode"));
         if (resp.statusCode == 200) {
           final data = jsonDecode(resp.body);
           setState(() {
@@ -67,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // 檢查 barcode 是否存在 server
     try {
       final response =
-          await http.get(Uri.parse("http://10.13.13.84:5000/check/$barcode"));
+          await http.get(Uri.parse("http://10.255.85.198:5000/check/$barcode"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['exists'] == false) {
@@ -93,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool online = false;
     try {
       final statusResp =
-          await http.get(Uri.parse("http://10.13.13.84:5000/status/$barcode"));
+          await http.get(Uri.parse("http://10.255.85.198:5000/status/$barcode"));
       if (statusResp.statusCode == 200) {
         final statusData = jsonDecode(statusResp.body);
         online = statusData['online'] ?? false;

@@ -32,7 +32,7 @@ class _DataPageState extends State<DataPage> {
           });
         },
       ),
-      const HistoryPage(),
+      HistoryPage(addedSites: _addedSites),
     ];
   }
 
@@ -40,15 +40,24 @@ class _DataPageState extends State<DataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white, // 上方 bar 白色
         title: const Text(
           "儲能系統",
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: Colors.black, // 黑色字避免白底看不到
+          ),
         ),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black), // 左側返回/圖示設黑色
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white, // 下方 bar 白色
         currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue, // 選中的圖示/字顏色
+        unselectedItemColor: Colors.grey, // 未選中的顏色
         onTap: (index) {
           setState(() {
             _currentIndex = index;
